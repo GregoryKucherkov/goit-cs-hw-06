@@ -108,7 +108,12 @@ def save_to_db(data):
 
     try:
         data = unquote_plus(data)
-        parse_data = dict([i.split("=") for i in data.split("&")])
+        parse_data = {}
+        for item in data.split("&"):
+            parse_data["date"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            key, value = item.split("=")
+            parse_data[key] = value
+            
         db.messages.insert_one(parse_data)
     except Exception as e:
         logging.error(e)
