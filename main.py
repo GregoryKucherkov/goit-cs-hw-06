@@ -6,7 +6,8 @@ from urllib.parse import urlparse, unquote_plus
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 import logging 
-from threading import Thread
+
+from multiprocessing import Process
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from datetime import datetime
@@ -22,7 +23,7 @@ SOCKET_PORT = 5000
 HTTP_HOST = "0.0.0.0"
 SOCKET_HOST = "127.0.0.1"
 
-
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(processName)s - %(message)s")
 
 class BestFramework(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -139,11 +140,14 @@ def run_socket_server():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(threadName)s - %(message)s")
+    http_server_process = Process(target=run_http_server, name="HTTP_Server")
+    socket_server_process = Process(target=run_socket_server, name="SOCKET_Server")
 
-    
-    Thread(target=run_http_server, name="HTTP_Server").start()
-    Thread(target=run_socket_server, name="SOCKET_Server").start()
+    http_server_process.start()
+    socket_server_process.start()
+
+    http_server_process.join()
+    socket_server_process.join()
 
     
 
